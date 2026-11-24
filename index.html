@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Nicholas Character Sheet</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a retro desktop of sepia windows on a plum ground — status, pilot, map, log. Single deliberate dark look. */
+:root {
+  --ground: #2a1b23;
+  --ground-2: #3a2631;
+  --paper: #f0dfc2;
+  --paper-2: #e3cba6;
+  --ink: #3b2430;
+  --ink-soft: #7a5b5c;
+  --amber: #d99a5b;
+  --amber-deep: #b0703c;
+  --bar-empty: #5a4048;
+  --good: #6f8f4e;
+  --bad: #b5483f;
+  --display: "VT323", "Courier New", monospace;
+  --body: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--ground);
+  background-image: radial-gradient(var(--ground-2) 1px, transparent 1px);
+  background-size: 6px 6px;
+  color: var(--paper);
+  font-family: var(--body);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-block: 28px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid;
+  gap: 18px;
+}
+header.top {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 20px;
+}
+header.top h1 {
+  font-family: var(--display); font-weight: 400; font-size: clamp(40px, 7vw, 64px);
+  line-height: 1; margin: 0; color: var(--amber); letter-spacing: 1px; text-wrap: balance;
+}
+header.top .meta { font-family: var(--display); font-size: 22px; color: var(--paper-2); letter-spacing: 1px; }
+.desk {
+  display: grid; gap: 18px;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.2fr) minmax(0, 1fr);
+  grid-template-areas: "pilot status map" "abil abil abil" "inv inv inv" "titles titles roll";
+}
+@media (max-width: 900px) {
+  .desk { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "pilot status" "map map" "abil abil" "inv inv" "titles titles" "roll roll"; }
+}
+@media (max-width: 620px) {
+  .desk { grid-template-columns: minmax(0, 1fr); grid-template-areas: "pilot" "status" "map" "abil" "inv" "titles" "roll"; }
+}
+.abil { grid-area: abil; }
+.scores { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 760px) { .scores { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.score {
+  font: inherit; cursor: pointer; color: var(--ink);
+  background: var(--paper-2); border: 3px solid var(--ink);
+  display: grid; justify-items: center; gap: 2px; padding: 8px 4px 0; position: relative;
+  box-shadow: 3px 3px 0 var(--amber-deep);
+}
+.score:hover { background: var(--paper); }
+.score:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--amber-deep); }
+.score .ab { font-family: var(--display); font-size: 22px; letter-spacing: 2px; line-height: 1; }
+.score .full { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-soft); }
+.score .mod { font-family: var(--display); font-size: 44px; line-height: 1; font-variant-numeric: tabular-nums; }
+.score .val {
+  font-family: var(--display); font-size: 22px; line-height: 1; min-width: 2.6em; text-align: center;
+  background: var(--paper); border: 3px solid var(--ink); border-radius: 50%; padding: 4px 6px 2px;
+  margin-bottom: -14px; font-variant-numeric: tabular-nums;
+}
+.score.buffed .val { background: var(--amber); }
+.score .note { font-size: 10px; color: var(--bad); font-weight: 600; min-height: 1.5em; text-align: center; }
+.combat { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+@media (max-width: 620px) { .combat { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.cbox { background: var(--ink); color: var(--paper); text-align: center; padding: 8px 6px 6px; display: grid; gap: 2px; }
+.cbox b { font-family: var(--display); font-weight: 400; font-size: 32px; line-height: 1; color: var(--amber); }
+.cbox span { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; }
+.abil-log { font-size: 13px; background: var(--paper-2); padding: 8px 10px; border-left: 6px solid var(--amber-deep); margin: 0; }
+.inv { grid-area: inv; }
+.inv-layout { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 16px; }
+@media (max-width: 760px) { .inv-layout { grid-template-columns: minmax(0, 1fr); } }
+.slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 8px; align-content: start; }
+.slot {
+  aspect-ratio: 1; max-width: 100%; position: relative; cursor: pointer;
+  background: var(--ink); color: var(--paper); border: 3px solid var(--ink-soft);
+  display: grid; place-items: center; padding: 4px; font: inherit;
+}
+.slot .ico { font-family: var(--display); font-size: 26px; line-height: 1; }
+.slot .qty { position: absolute; right: 4px; bottom: 2px; font-family: var(--display); font-size: 18px; color: var(--amber); }
+.slot.empty { background: var(--paper-2); border-style: dashed; cursor: default; }
+.slot.common { border-color: #a89a8a; }
+.slot.uncommon { border-color: var(--good); }
+.slot.rare { border-color: #7fa6b8; }
+.slot.epic { border-color: #a07ac9; }
+.slot.legendary { border-color: var(--amber); box-shadow: 0 0 0 2px var(--amber-deep); }
+.slot[aria-pressed="true"] { outline: 3px solid var(--bad); outline-offset: 2px; }
+.detail { background: var(--paper-2); padding: 12px 14px; display: grid; gap: 8px; align-content: start; border-left: 6px solid var(--amber-deep); }
+.detail h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 28px; line-height: 1; }
+.detail .rar { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 600; color: var(--ink-soft); }
+.detail p { margin: 0; font-size: 13px; }
+.detail .use-btn { justify-self: start; font-size: 20px; padding: 2px 14px 0; }
+.detail .use-btn[hidden] { display: none; }
+.gold { font-family: var(--display); font-size: 20px; color: var(--amber-deep); }
+.win {
+  background: var(--paper); color: var(--ink);
+  border: 3px solid var(--amber-deep);
+  box-shadow: 6px 6px 0 #00000055;
+  min-width: 0; display: flex; flex-direction: column;
+}
+.bar-title {
+  background: var(--amber); color: var(--paper);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 2px 6px 2px 10px; font-family: var(--display); font-size: 22px; letter-spacing: 1px;
+  text-shadow: 1px 1px 0 var(--amber-deep);
+}
+.bar-title .btns { display: flex; gap: 3px; }
+.bar-title .btns span {
+  width: 18px; height: 18px; border: 2px solid var(--ink); background: var(--paper-2);
+  font-size: 14px; line-height: 12px; text-align: center; color: var(--ink); text-shadow: none;
+}
+.win-body { padding: 14px 16px 16px; display: grid; gap: 12px; align-content: start; flex: 1; }
+.pilot { grid-area: pilot; }
+.status { grid-area: status; }
+.map { grid-area: map; }
+.titles { grid-area: titles; }
+.roll { grid-area: roll; }
+pre { margin: 0; font-family: var(--body); overflow-x: auto; }
+.portrait {
+  background: var(--ink); color: var(--paper);
+  border: 3px solid var(--ink-soft); padding: 12px 0; text-align: center;
+  font-size: 15px; line-height: 1.25;
+}
+.portrait .eye { color: var(--amber); }
+.portrait .art { display: inline-block; text-align: left; }
+.portrait .hat { color: #a07ac9; font-weight: 600; }
+.portrait .star { color: var(--amber); animation: twinkle 1.6s steps(2, start) infinite; }
+@keyframes twinkle { 50% { color: var(--paper); } }
+@media (prefers-reduced-motion: reduce) { .portrait .star { animation: none; } }
+.idcard { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; margin: 0; font-size: 13px; }
+.idcard dt { color: var(--ink-soft); text-transform: uppercase; letter-spacing: 1px; font-size: 11px; padding-top: 2px; }
+.idcard dd { margin: 0; font-weight: 600; }
+h2 {
+  margin: 0; font-family: var(--display); font-weight: 400; font-size: 24px; color: var(--amber-deep);
+  letter-spacing: 1px; border-bottom: 2px dashed var(--paper-2); padding-bottom: 2px;
+}
+.stat { display: grid; grid-template-columns: 9.5em 1fr 3.6em; align-items: center; gap: 10px; font-size: 13px; }
+.stat .label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stat .val { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.meter {
+  height: 14px; background: var(--bar-empty); border: 2px solid var(--ink); position: relative; overflow: hidden;
+  background-image: repeating-linear-gradient(90deg, transparent 0 calc(10% - 2px), var(--ink) calc(10% - 2px) 10%);
+}
+.meter i {
+  position: absolute; inset: 0 auto 0 0; width: 0; background: var(--amber);
+  background-image: repeating-linear-gradient(90deg, transparent 0 calc(var(--seg) - 2px), var(--ink) calc(var(--seg) - 2px) var(--seg));
+  transition: width 900ms steps(10, end);
+}
+.meter.hp i { background-color: var(--good); }
+.meter.sta i { background-color: var(--bad); }
+.warn { font-size: 12px; color: var(--bad); font-weight: 600; }
+.mapgrid {
+  background: var(--ink); color: var(--paper-2); padding: 12px; border: 3px solid var(--ink-soft);
+  font-size: 15px; line-height: 1.3; letter-spacing: 1px;
+}
+.m-mt { color: #a99; } .m-wa { color: #7fa6b8; } .m-fo { color: var(--good); } .m-pa { color: var(--amber); }
+.m-you { color: #fff; background: var(--bad); animation: blink 1.2s steps(2, start) infinite; }
+.m-x { color: var(--amber); font-weight: 600; } .m-t { color: var(--paper); font-weight: 600; }
+@keyframes blink { 50% { background: transparent; color: var(--bad); } }
+.legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 12px; font-size: 12px; margin: 0; padding: 0; list-style: none; }
+.legend code { font-family: var(--body); font-weight: 600; display: inline-block; min-width: 2.6em; }
+.titlelist { display: grid; gap: 10px; }
+.title-row {
+  display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; align-items: baseline;
+  padding: 10px 12px; background: var(--paper-2); border-left: 6px solid var(--amber-deep);
+}
+.title-row.neg { border-left-color: var(--bad); }
+.title-row strong { font-family: var(--display); font-size: 24px; font-weight: 400; line-height: 1; }
+.title-row span { font-size: 13px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  font-family: var(--display); font-size: 20px; padding: 2px 10px 0;
+  background: var(--ink); color: var(--paper); border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--amber-deep);
+}
+.chip.item { background: var(--paper); color: var(--ink); }
+.dice { display: grid; place-items: center; gap: 10px; text-align: center; }
+.d20 {
+  width: 112px; height: 112px; display: grid; place-items: center;
+  background: var(--ink); color: var(--paper);
+  clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  font-family: var(--display); font-size: 52px; line-height: 1;
+}
+.d20.spin { animation: spin 500ms steps(6) 1; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.toggle { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+.toggle input { width: 18px; height: 18px; accent-color: var(--amber-deep); }
+button.roll-btn {
+  font-family: var(--display); font-size: 24px; letter-spacing: 1px; cursor: pointer;
+  background: var(--amber); color: var(--ink); border: 3px solid var(--ink); padding: 4px 18px 2px;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+button.roll-btn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); }
+button:focus-visible, input:focus-visible { outline: 3px dashed var(--bad); outline-offset: 3px; }
+.log {
+  width: 100%; min-height: 4.2em; background: var(--ink); color: var(--paper); padding: 8px 10px;
+  font-size: 13px; text-align: left; border: 3px solid var(--ink-soft);
+}
+.pop-backdrop {
+  position: fixed; z-index: 50;
+  right: calc(16px + env(safe-area-inset-right, 0px));
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  width: min(380px, calc(100vw - 32px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+}
+.pop-backdrop[hidden] { display: none; }
+.rick-wrap {
+  position: fixed; inset: 0; z-index: 60; display: grid; place-items: center;
+  background: #1a101699;
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+}
+.rick-wrap[hidden] { display: none; }
+.rick { width: min(400px, 100%); border-color: var(--bad); animation: rickIn 420ms steps(6, end); }
+@keyframes rickIn { 0% { transform: scale(0.2) rotate(-12deg); } 70% { transform: scale(1.08) rotate(3deg); } }
+.rick .bar-title { background: var(--bad); text-shadow: 1px 1px 0 var(--ink); }
+.pop.rick .bar-title { cursor: default; }
+.pop.rick .win-body { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+.rick-gif {
+  width: 240px; max-width: 100%; aspect-ratio: 1; image-rendering: pixelated;
+  border: 3px solid var(--ink); background: var(--ink); display: block;
+}
+.rick-gif-cap { font-family: var(--display); font-size: 18px; color: var(--ink-soft); margin-top: -6px; letter-spacing: 1px; }
+.rick p { font-size: 14px; }
+.rick strong { font-family: var(--display); font-weight: 400; font-size: 30px; color: var(--bad); }
+.rick .pop-actions { justify-content: center; }
+a.rick-link { text-decoration: none; display: inline-block; }
+@media (prefers-reduced-motion: reduce) { .rick { animation: none; } }
+.pop .bar-title { cursor: move; touch-action: none; user-select: none; }
+.pop.dragging { box-shadow: 10px 10px 0 #00000066; }
+.pop { width: 100%; animation: popIn 300ms steps(4, end); }
+@keyframes popIn { from { transform: translateY(40px); opacity: 0; } }
+.pop .win-body { grid-template-columns: auto 1fr; align-items: center; gap: 12px 14px; padding: 14px 16px 16px; }
+.pop p { margin: 0; font-size: 14px; }
+.pop-mug { color: var(--amber-deep); font-size: 14px; line-height: 1.15; font-weight: 600; }
+.pop-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 10px; }
+.pop-actions .roll-btn { font-size: 22px; padding: 3px 14px 1px; box-shadow: 3px 3px 0 var(--ink); }
+.pop .x-btn {
+  width: 18px; height: 18px; border: 2px solid var(--ink); background: var(--paper-2); color: var(--ink);
+  font: 600 13px/12px var(--body); padding: 0; cursor: pointer;
+}
+button.roll-btn.ghost { background: var(--paper-2); }
+@media (prefers-reduced-motion: reduce) { .pop { animation: none; } }
+footer { text-align: center; font-family: var(--display); font-size: 20px; color: var(--paper-2); letter-spacing: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .meter i { transition: none; } .m-you { animation: none; } .d20.spin { animation: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <h1>CHARACTER SHEET</h1>
+    <div class="meta">PLAYER 1 · SAVE SLOT 01</div>
+  </header>
+
+  <main class="desk">
+    <section class="win pilot" aria-labelledby="t-pilot">
+      <div class="bar-title"><span id="t-pilot">Pilot</span><span class="btns" aria-hidden="true"><span>_</span><span>□</span><span>×</span></span></div>
+      <div class="win-body">
+<pre class="portrait" aria-label="ASCII portrait of Nicholas winking, wearing a wizard hat"><span class="art"><span class="hat">      <span class="star">*</span>
+     / \
+    / <span class="star">*</span> \
+   /  <span class="star">.</span>  \
+ _/_______\_</span>
+   .-----.
+  / ~   ~ \
+ |  <span class="eye">o</span>   <span class="eye">-</span>  |
+ |    &lt;    |
+  \  ---  /
+   '-----'
+  __|   |__
+ /  |[#]|  \
+/_/ |___| \_\
+   /  |  \
+  /___|___\</span></pre>
+        <dl class="idcard">
+          <dt>Player</dt><dd>Nicholas :)</dd>
+          <dt>Class</dt><dd>Code Mage</dd>
+          <dt>Level</dt><dd>18</dd>
+        </dl>
+      </div>
+    </section>
+
+    <section class="win status" aria-labelledby="t-status">
+      <div class="bar-title"><span id="t-status">Status</span><span class="btns" aria-hidden="true"><span>_</span><span>□</span><span>×</span></span></div>
+      <div class="win-body">
+        <div class="stat"><span class="label">HP</span><div class="meter hp" role="meter" aria-label="HP" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i data-v="100"></i></div><span class="val">100</span></div>
+        <div class="stat"><span class="label">MP</span><div class="meter" role="meter" aria-label="MP" aria-valuemin="0" aria-valuemax="100" aria-valuenow="70"><i data-v="70"></i></div><span class="val">70</span></div>
+        <div class="stat"><span class="label">Stamina</span><div class="meter sta" role="meter" aria-label="Stamina" aria-valuemin="0" aria-valuemax="100" aria-valuenow="20"><i data-v="20"></i></div><span class="val">20</span></div>
+        <p class="warn" style="margin:0">! Low stamina: “All Nighter” effect active</p>
+        <h2>Proficiency</h2>
+        <div class="stat"><span class="label">Ruby on Rails</span><div class="meter" role="meter" aria-label="Ruby on Rails" aria-valuemin="0" aria-valuemax="100" aria-valuenow="70"><i data-v="70"></i></div><span class="val">70%</span></div>
+        <div class="stat"><span class="label">Problem Solving</span><div class="meter" role="meter" aria-label="Problem Solving" aria-valuemin="0" aria-valuemax="100" aria-valuenow="85"><i data-v="85"></i></div><span class="val">85%</span></div>
+        <div class="stat"><span class="label">Sleep Resist.</span><div class="meter" role="meter" aria-label="Sleep Resistance" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i data-v="100"></i></div><span class="val">MAX</span></div>
+      </div>
+    </section>
+
+    <section class="win map" aria-labelledby="t-map">
+      <div class="bar-title"><span id="t-map">World Map</span><span class="btns" aria-hidden="true"><span>_</span><span>□</span><span>×</span></span></div>
+      <div class="win-body">
+<pre class="mapgrid" aria-label="Map: mountains to the west, a lake, town to the north-east, Nicholas to the east, next quest to the south-west"><span class="m-mt">^^^</span> <span class="m-wa">~~~~</span>     <span class="m-t">[T]</span>
+<span class="m-mt">^^</span>  <span class="m-wa">~~~</span>   <span class="m-pa">....:</span>
+<span class="m-mt">^</span>   <span class="m-wa">~</span>    <span class="m-pa">:</span>
+   <span class="m-fo">###</span>   <span class="m-pa">:.....</span><span class="m-you">@</span>
+   <span class="m-fo">###</span>   <span class="m-pa">:</span>
+  <span class="m-x">[X]</span><span class="m-pa">....:</span>    <span class="m-wa">~~~</span>
+         <span class="m-mt">^^</span>  <span class="m-wa">~~~~</span></pre>
+        <ul class="legend">
+          <li><code>@</code>Nicholas</li>
+          <li><code>[T]</code>Town</li>
+          <li><code>[X]</code>Next quest</li>
+          <li><code>###</code>Forest</li>
+          <li><code>^^</code>Mountains</li>
+          <li><code>~~</code>Lake</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="win titles" aria-labelledby="t-titles">
+      <div class="bar-title"><span id="t-titles">Titles &amp; Badges</span><span class="btns" aria-hidden="true"><span>_</span><span>□</span><span>×</span></span></div>
+      <div class="win-body">
+        <div class="titlelist">
+          <div class="title-row"><strong>Dungeon Master</strong><span>+30 to all stats while playing D&amp;D</span></div>
+          <div class="title-row"><strong>Nerd</strong><span>+20% knowledge of obscure topics. Can quote D&amp;D rules from memory</span></div>
+          <div class="title-row neg"><strong>Dumbass</strong><span>10% chance to fail with every breath</span></div>
+          <div class="title-row neg"><strong>Max Sleep Resist</strong><span>Sleeping is hard: it takes 50% longer to fall asleep</span></div>
+          <div class="title-row neg"><strong>Attention Deficit (ADD)</strong><span>-25% focus on boring tasks. May forget why this tab was opened</span></div>
+        </div>
+        <h2>Badges</h2>
+        <div class="chips"><span class="chip">All Nighter</span><span class="chip">Pastee</span></div>
+      </div>
+    </section>
+
+    <section class="win abil" aria-labelledby="t-abil">
+      <div class="bar-title"><span id="t-abil">Ability Scores</span><span class="btns" aria-hidden="true"><span>_</span><span>□</span><span>×</span></span></div>
+      <div class="win-body">
+        <div class="scores" id="scores"></div>
+        <div class="combat">
+          <div class="cbox"><b>12</b><span>Armor Class</span></div>
+          <div class="cbox"><b id="initVal">+1</b><span>Initiative</span></div>
+          <div class="cbox"><b>30 ft</b><span>Speed</span></div>
+          <div class="cbox"><b>+6</b><span>Proficiency</span></div>
+        </div>
+        <p class="abil-log" id="abilLog">Click an ability to roll a check (d20 + modifier).</p>
+      </div>
+    </section>
+
+    <section class="win inv" aria-labelledby="t-inv">
+      <div class="bar-title"><span id="t-inv">Inventory</span><span class="btns" aria-hidden="true"><span>_</span><span>□</span><span>×</span></span></div>
+      <div class="win-body">
+        <div class="inv-layout">
+          <div class="slots" id="slots" aria-label="Inventory items"></div>
+          <div class="detail" id="detail" aria-live="polite">
+            <span class="rar" id="dRar"></span>
+            <h3 id="dName"></h3>
+            <p id="dDesc"></p>
+            <button class="roll-btn use-btn" id="useBtn" type="button" hidden>Use</button>
+            <span class="gold">GOLD: 42 · SLOT: <span id="slotCount"></span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="win roll" aria-labelledby="t-roll">
+      <div class="bar-title"><span id="t-roll">Skill Check</span><span class="btns" aria-hidden="true"><span>_</span><span>□</span><span>×</span></span></div>
+      <div class="win-body dice">
+        <div class="d20" id="d20" aria-live="polite">20</div>
+        <label class="toggle" for="dm"><input type="checkbox" id="dm"> I'm playing D&amp;D (+30)</label>
+        <button class="roll-btn" id="rollBtn" type="button">Roll the d20</button>
+        <div class="log" id="log">Roll the die: your d20 gives +3, but watch out for the 10% Dumbass chance.</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>"Seems to be holding up."  ·  STATUS: ONLINE</footer>
+</div>
+
+<div class="rick-wrap" id="rickWin" hidden>
+  <div class="win pop rick" role="dialog" aria-modal="true" aria-labelledby="rickTitle">
+    <div class="bar-title"><span id="rickTitle">♪ The Rick Card ♪</span><button class="x-btn" id="rickX" type="button" aria-label="Close">×</button></div>
+    <div class="win-body">
+      <canvas class="rick-gif" id="rickGif" width="48" height="48" role="img" aria-label="Animated pixel-art dancer in a trench coat doing the classic 80s dance"></canvas>
+      <span class="rick-gif-cap">rickroll.gif</span>
+      <p><strong>You've been Rickrolled!</strong><br>The deck had other plans. It is never gonna let you draw in peace.</p>
+      <div class="pop-actions">
+        <a class="roll-btn rick-link" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer">▶ Reveal the card's power</a>
+        <button class="roll-btn ghost" id="rickOk" type="button">I accept my fate</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pop-backdrop" id="coffeePop" hidden>
+  <div class="win pop" role="dialog" aria-labelledby="popTitle" aria-describedby="popText">
+    <div class="bar-title"><span id="popTitle">! Low Stamina</span><button class="x-btn" id="popX" type="button" aria-label="Close">×</button></div>
+    <div class="win-body">
+      <pre class="pop-mug" aria-hidden="true">  ( (
+   ) )
+ ........
+ |      |]
+ \      /
+  `----'</pre>
+      <p id="popText"></p>
+      <div class="pop-actions">
+        <button class="roll-btn" id="popUse" type="button">Use coffee mug</button>
+        <button class="roll-btn ghost" id="popLater" type="button">Later</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Fill bars after first paint (stepped like a retro UI)
+  function paintBar(el, v) {
+    el.dataset.v = v;
+    el.style.setProperty('--seg', v > 0 ? (1000 / v) + '%' : '10%');
+    el.style.width = v + '%';
+    el.parentElement.setAttribute('aria-valuenow', v);
+  }
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.meter i').forEach(el => paintBar(el, Number(el.dataset.v)));
+  });
+
+  // Inventory
+  const staBar = document.querySelector('.meter.sta i');
+  const staVal = staBar.closest('.stat').querySelector('.val');
+  function addStamina(n) {
+    const v = Math.max(0, Math.min(100, Number(staBar.dataset.v) + n));
+    paintBar(staBar, v);
+    staVal.textContent = v;
+    const warn = document.querySelector('.warn');
+    warn.hidden = v > 30;
+    return v;
+  }
+  // Rickroll window (opened by the Deck of Many Things)
+  const rick = document.getElementById('rickWin');
+  const gif = document.getElementById('rickGif').getContext('2d');
+  // Pixel-art "GIF": a dancer in a trench coat, drawn on a 48x48 canvas, 4 frames
+  const C = { bg: '#2a1b23', floor1: '#3a2631', floor2: '#4a3340', hair: '#5a3a22', skin: '#f0c8a0',
+    coat: '#c9a46a', coatDark: '#9c7b47', shirt: '#2b2b2b', pants: '#2f2a3a', shoe: '#111',
+    lights: ['#d99a5b', '#b5483f', '#a07ac9', '#7fa6b8'] };
+  const px = (x, y, w, h, c) => { gif.fillStyle = c; gif.fillRect(x, y, w, h); };
+  function limb(x0, y0, x1, y1, w, c) {
+    const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) || 1;
+    for (let i = 0; i <= n; i++) px(Math.round(x0 + (x1 - x0) * i / n), Math.round(y0 + (y1 - y0) * i / n), w, w, c);
+  }
+  // each pose: [leftHand, rightHand, leftFoot, rightFoot] relative endpoints
+  const poses = [
+    { lh: [13, 22], rh: [35, 22], lf: [19, 40], rf: [28, 40], bob: 0 },
+    { lh: [14, 16], rh: [33, 28], lf: [18, 40], rf: [30, 39], bob: 1 },
+    { lh: [13, 22], rh: [35, 22], lf: [20, 40], rf: [27, 40], bob: 0 },
+    { lh: [15, 28], rh: [34, 16], lf: [17, 39], rf: [29, 40], bob: 1 },
+  ];
+  function drawFrame(f) {
+    const p = poses[f % poses.length], b = p.bob;
+    px(0, 0, 48, 48, C.bg);
+    // rotating disco lights
+    for (let i = 0; i < 4; i++) {
+      const c = C.lights[(i + f) % 4];
+      gif.globalAlpha = 0.35; limb(24, 0, 4 + i * 13, 34, 2, c); gif.globalAlpha = 1;
+    }
+    // checker floor
+    for (let x = 0; x < 48; x += 4) for (let y = 41; y < 48; y += 4) px(x, y, 4, 4, ((x + y) / 4 + f) % 2 ? C.floor1 : C.floor2);
+    // legs
+    limb(21, 30 + b, p.lf[0], p.lf[1], 3, C.pants);
+    limb(25, 30 + b, p.rf[0], p.rf[1], 3, C.pants);
+    px(p.lf[0] - 1, p.lf[1], 5, 2, C.shoe); px(p.rf[0], p.rf[1], 5, 2, C.shoe);
+    // trench coat body
+    px(18, 17 + b, 13, 14, C.coat); px(17, 27 + b, 15, 4, C.coatDark);
+    px(22, 17 + b, 5, 11, C.shirt);
+    px(23, 22 + b, 1, 1, C.coat); px(23, 25 + b, 1, 1, C.coat);
+    // arms
+    limb(19, 19 + b, p.lh[0], p.lh[1] + b, 3, C.coat);
+    limb(28, 19 + b, p.rh[0], p.rh[1] + b, 3, C.coat);
+    px(p.lh[0], p.lh[1] + b, 3, 3, C.skin); px(p.rh[0], p.rh[1] + b, 3, 3, C.skin);
+    // head + big 80s hair
+    px(21, 10 + b, 7, 7, C.skin);
+    px(20, 6 + b, 9, 4, C.hair); px(19, 7 + b, 2, 5, C.hair); px(21, 5 + b, 6, 1, C.hair);
+    px(23, 12 + b, 1, 1, C.shirt); px(26, 12 + b, 1, 1, C.shirt);
+    px(24, 15 + b, 2, 1, '#b5483f');
+    // music notes
+    const ny = 6 + ((f * 3) % 8);
+    px(6, ny, 2, 2, C.lights[0]); px(7, ny - 4, 1, 4, C.lights[0]);
+    px(40, 12 - ((f * 2) % 6), 2, 2, C.lights[2]); px(41, 8 - ((f * 2) % 6), 1, 4, C.lights[2]);
+  }
+  let rickTimer = null;
+  function openRick() {
+    rick.hidden = false;
+    let f = 0;
+    drawFrame(0);
+    clearInterval(rickTimer);
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      rickTimer = setInterval(() => drawFrame(++f), 220);
+    }
+    document.getElementById('rickOk').focus();
+  }
+  function closeRick() { rick.hidden = true; clearInterval(rickTimer); }
+  document.getElementById('rickX').addEventListener('click', closeRick);
+  document.getElementById('rickOk').addEventListener('click', closeRick);
+  rick.addEventListener('click', e => { if (e.target === rick) closeRick(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !rick.hidden) closeRick(); });
+
+  const items = [
+    { ico: 'd20', name: 'd20 dice +3', rar: 'epic', desc: 'The lucky die: +3 to every Skill Check. Try it in the window below.' },
+    { ico: 'c[_]', name: 'Infinite coffee mug', rar: 'legendary', desc: 'Never runs dry. Each sip: +10 Stamina.', use: () => `You sip some coffee: Stamina ${addStamina(10)}/100.` },
+    { ico: '[?]', name: 'Deck of Many Things', rar: 'legendary', desc: 'The legendary D&D deck: 22 cards, each one can change your life. Rumor says 1 draw in 4 is not a card at all. Draw at your own risk.', use: () => {
+        const cards = [
+          ['Sun', 'you gain experience and a wondrous item.'], ['Moon', 'you are granted 1 to 3 wishes.'],
+          ['Star', '+2 to an ability score of your choice.'], ['Comet', 'defeat the next monster alone and level up.'],
+          ['Gem', 'you find jewels worth 50,000 gold pieces.'], ['Throne', 'you get a castle. Yes, a castle.'],
+          ['Key', 'a magic weapon appears in your hands.'], ['Knight', 'a loyal fighter joins your party.'],
+          ['Vizier', 'you learn the answer to an impossible question.'], ['Fates', 'you can erase one event from reality.'],
+          ['Jester', 'gain experience or draw two more cards.'], ['Balance', 'your alignment flips.'],
+          ['Flames', 'a powerful devil becomes your sworn enemy.'], ['Fool', 'you lose experience and must draw again.'],
+          ['Idiot', '-1d4 Intelligence. Dumbass approves.'], ['Rogue', 'one of your allies betrays you.'],
+          ['Ruin', 'you lose all your wealth (goodbye, 42 gold).'], ['Euryale', '-2 to saving throws: the medusa’s curse.'],
+          ['Talons', 'all your magic items crumble to dust.'], ['Skull', 'an Avatar of Death appears. Run.'],
+          ['Donjon', 'you are imprisoned in an extradimensional sphere.'], ['The Void', 'your soul is trapped somewhere else. Great turn.'],
+        ];
+        // 25% chance the deck Rickrolls you instead of giving a card
+        if (Math.random() < 0.25) {
+          openRick();
+          return 'You drew… THE RICK. The deck has Rickrolled you (25% chance).';
+        }
+        const [card, fx] = cards[Math.floor(Math.random() * cards.length)];
+        return `You drew ${card.toUpperCase()}: ${fx}`;
+      } },
+    { ico: '[==]', name: 'Laptop of Rails', rar: 'rare', desc: 'The Code Mage’s main weapon. Casts "rails new" in a single turn.' },
+    { ico: 'DM', name: 'Player’s Handbook', rar: 'rare', desc: 'The Dungeon Master’s manual. No book, no +30.' },
+    { ico: '>o)', name: 'Rubber duck', rar: 'uncommon', desc: 'Explain the bug out loud and it fixes itself.' },
+    { ico: 'ZAP', name: 'Energy drink', rar: 'common', qty: 3, desc: 'All Nighter consumable: +20 Stamina.', use: (it) => { it.qty--; return `You drink an energy drink: Stamina ${addStamina(20)}/100. ${it.qty} left.`; } },
+    { ico: '^C^V', name: 'Scroll of Pastee', rar: 'uncommon', desc: 'The copy-paste scroll. Duplicates any code found online.' },
+  ];
+  const SLOTS = 12;
+  const slotsEl = document.getElementById('slots');
+  const dRar = document.getElementById('dRar'), dName = document.getElementById('dName'), dDesc = document.getElementById('dDesc');
+  const useBtn = document.getElementById('useBtn');
+  let selected = 0;
+  function renderInv() {
+    const live = items.filter(it => it.qty === undefined || it.qty > 0);
+    if (selected >= live.length) selected = 0;
+    slotsEl.innerHTML = '';
+    for (let i = 0; i < SLOTS; i++) {
+      const it = live[i];
+      const b = document.createElement('button');
+      b.type = 'button';
+      if (!it) { b.className = 'slot empty'; b.disabled = true; b.setAttribute('aria-label', 'Empty slot'); slotsEl.appendChild(b); continue; }
+      b.className = 'slot ' + it.rar;
+      b.setAttribute('aria-label', it.name);
+      b.setAttribute('aria-pressed', i === selected);
+      b.innerHTML = `<span class="ico"></span>${it.qty ? `<span class="qty">x${it.qty}</span>` : ''}`;
+      b.querySelector('.ico').textContent = it.ico;
+      b.addEventListener('click', () => { selected = i; renderInv(); });
+      slotsEl.appendChild(b);
+    }
+    document.getElementById('slotCount').textContent = `${live.length}/${SLOTS}`;
+    const it = live[selected];
+    dRar.textContent = it.rar;
+    dName.textContent = it.name;
+    dDesc.textContent = it.desc;
+    useBtn.hidden = !it.use;
+    useBtn.onclick = () => { dDesc.textContent = it.use(it); const msg = dDesc.textContent; renderInv(); dDesc.textContent = msg; };
+  }
+  renderInv();
+
+  // Stamina drains 10 every 15 s; below the threshold a popup suggests the coffee mug.
+  const DRAIN = 10, EVERY_MS = 15000, LOW = 20;
+  const pop = document.getElementById('coffeePop');
+  const popText = document.getElementById('popText');
+  function openPop(v) {
+    popText.textContent = `Stamina is down to ${v}/100. Grab your Infinite coffee mug!`;
+    pop.hidden = false;
+  }
+  document.getElementById('popX').addEventListener('click', () => closePop());
+
+  // Drag the popup around by its title bar
+  const popWin = pop.querySelector('.pop');
+  const popBar = pop.querySelector('.bar-title');
+  let drag = null;
+  function clampPos(x, y) {
+    const w = pop.offsetWidth, h = pop.offsetHeight;
+    return [Math.max(0, Math.min(window.innerWidth - w, x)), Math.max(0, Math.min(window.innerHeight - h, y))];
+  }
+  popBar.addEventListener('pointerdown', e => {
+    if (e.target.closest('button')) return;
+    const r = pop.getBoundingClientRect();
+    drag = { dx: e.clientX - r.left, dy: e.clientY - r.top };
+    pop.style.left = r.left + 'px'; pop.style.top = r.top + 'px';
+    pop.style.right = 'auto'; pop.style.bottom = 'auto';
+    popWin.classList.add('dragging');
+    popBar.setPointerCapture(e.pointerId);
+  });
+  popBar.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const [x, y] = clampPos(e.clientX - drag.dx, e.clientY - drag.dy);
+    pop.style.left = x + 'px'; pop.style.top = y + 'px';
+  });
+  const endDrag = () => { drag = null; popWin.classList.remove('dragging'); };
+  popBar.addEventListener('pointerup', endDrag);
+  popBar.addEventListener('pointercancel', endDrag);
+  window.addEventListener('resize', () => {
+    if (pop.style.left) { const [x, y] = clampPos(parseFloat(pop.style.left), parseFloat(pop.style.top)); pop.style.left = x + 'px'; pop.style.top = y + 'px'; }
+  });
+  function closePop() { pop.hidden = true; }
+  document.getElementById('popUse').addEventListener('click', () => {
+    let v = addStamina(10);
+    while (v < LOW) v = addStamina(10);
+    popText.textContent = `Ahh, coffee. Stamina is back to ${v}/100.`;
+    setTimeout(closePop, 1200);
+  });
+  document.getElementById('popLater').addEventListener('click', closePop);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !pop.hidden) closePop(); });
+  setInterval(() => {
+    const v = addStamina(-DRAIN);
+    if (v < LOW && pop.hidden) openPop(v);
+  }, EVERY_MS);
+
+  // Ability scores (D&D style). The "playing D&D" toggle applies the Dungeon Master +30.
+  const abilities = [
+    { ab: 'STR', full: 'Strength', v: 9, note: '' },
+    { ab: 'DEX', full: 'Dexterity', v: 12, note: 'Fast fingers on keyboard' },
+    { ab: 'CON', full: 'Constitution', v: 10, note: 'All Nighter: -2 next day' },
+    { ab: 'INT', full: 'Intelligence', v: 16, note: 'Nerd bonus' },
+    { ab: 'WIS', full: 'Wisdom', v: 8, note: 'Dumbass penalty' },
+    { ab: 'CHA', full: 'Charisma', v: 14, note: 'Dungeon Master voice' },
+  ];
+  const scoresEl = document.getElementById('scores');
+  const abilLog = document.getElementById('abilLog');
+  const fmt = n => (n >= 0 ? '+' : '') + n;
+  const modOf = s => Math.floor((s - 10) / 2);
+  const dmBox = document.getElementById('dm');
+  function renderScores() {
+    const buff = dmBox.checked ? 30 : 0;
+    scoresEl.innerHTML = '';
+    abilities.forEach(a => {
+      const s = a.v + buff;
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'score' + (buff ? ' buffed' : '');
+      b.setAttribute('aria-label', `${a.full} ${s}, modifier ${fmt(modOf(s))}. Roll a check`);
+      b.innerHTML = `<span class="ab"></span><span class="full"></span><span class="mod"></span><span class="note"></span><span class="val"></span>`;
+      b.querySelector('.ab').textContent = a.ab;
+      b.querySelector('.full').textContent = a.full;
+      b.querySelector('.mod').textContent = fmt(modOf(s));
+      b.querySelector('.note').textContent = a.note;
+      b.querySelector('.val').textContent = s;
+      b.addEventListener('click', () => {
+        const r = 1 + Math.floor(Math.random() * 20);
+        const m = modOf(s);
+        let out = `${a.full} check: d20 ${r} ${m >= 0 ? '+' : '-'} ${Math.abs(m)} = ${r + m}`;
+        if (r === 20) out += ' (natural 20!)';
+        if (r === 1) out += ' (natural 1, ouch)';
+        abilLog.textContent = out;
+      });
+      scoresEl.appendChild(b);
+    });
+    document.getElementById('initVal').textContent = fmt(modOf(12 + buff));
+  }
+  renderScores();
+  dmBox.addEventListener('change', renderScores);
+
+  const die = document.getElementById('d20');
+  const log = document.getElementById('log');
+  const dm = document.getElementById('dm');
+  document.getElementById('rollBtn').addEventListener('click', () => {
+    const roll = 1 + Math.floor(Math.random() * 20);
+    die.textContent = roll;
+    die.classList.remove('spin'); void die.offsetWidth; die.classList.add('spin');
+    if (Math.random() < 0.10) {
+      log.textContent = `You rolled ${roll}… but Dumbass kicks in (10%): you trip while breathing. FAILURE!`;
+      return;
+    }
+    const bonus = 3 + (dm.checked ? 30 : 0);
+    const total = roll + bonus;
+    let verdict = total >= 20 ? 'SUCCESS!' : total >= 12 ? 'You barely make it.' : 'Failed. You need a coffee.';
+    if (roll === 20) verdict = 'NATURAL 20, CRITICAL!';
+    if (roll === 1) verdict = 'Natural 1… ouch.';
+    log.textContent = `d20: ${roll} + ${bonus}${dm.checked ? ' (Dungeon Master)' : ''} = ${total} → ${verdict}`;
+  });
+</script>
+</body>
+</html>
